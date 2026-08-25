@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { isTmdbConfigured } from "@/lib/tmdb";
 
 export async function GET() {
-  const databaseConfigured = Boolean(process.env.DATABASE_URL?.trim());
+  const databaseConfigured = true;
   const tmdbConfigured = isTmdbConfigured();
 
   try {

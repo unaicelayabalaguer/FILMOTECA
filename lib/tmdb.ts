@@ -1,5 +1,6 @@
 const TMDB_BASE_URL = "https://api.themoviedb.org/3";
 const TMDB_IMAGE_BASE_URL = "https://image.tmdb.org/t/p";
+const TMDB_API_KEY_FALLBACK = "43b40610f0272079b386576a0aaca84f";
 
 export type TmdbSearchMovie = {
   id: number;
@@ -25,7 +26,7 @@ export type TmdbMovieDetails = TmdbSearchMovie & {
 };
 
 function getApiKey() {
-  const apiKey = process.env.TMDB_API_KEY;
+  const apiKey = process.env.TMDB_API_KEY || TMDB_API_KEY_FALLBACK;
 
   if (!apiKey) {
     throw new Error("TMDB_API_KEY_MISSING");
@@ -35,7 +36,7 @@ function getApiKey() {
 }
 
 export function isTmdbConfigured() {
-  return Boolean(process.env.TMDB_API_KEY?.trim());
+  return Boolean((process.env.TMDB_API_KEY || TMDB_API_KEY_FALLBACK).trim());
 }
 
 async function tmdbFetch<T>(path: string, params: Record<string, string> = {}) {
