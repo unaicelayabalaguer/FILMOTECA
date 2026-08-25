@@ -17,33 +17,62 @@ export async function GET(request: Request) {
   const view = searchParams.get("view") ?? "shelf";
   const sort = searchParams.get("sort") ?? "recent";
   const genre = searchParams.get("genre")?.trim();
+  const director = searchParams.get("director")?.trim();
 
   try {
     const user = await getCurrentUser();
+    const movieWhere: Prisma.MovieWhereInput = {};
+
+    if (search) {
+      movieWhere.OR = [
+        { title: { contains: search, mode: "insensitive" } },
+        { originalTitle: { contains: search, mode: "insensitive" } },
+      ];
+    }
+
+    if (director) {
+      movieWhere.director = { contains: director, mode: "insensitive" };
+    }
+
     const where: Prisma.UserMovieWhereInput = {
       userId: user.id,
       ...(view === "favorites" ? { favorite: true } : {}),
-      ...(search
-        ? {
-            movie: {
-              OR: [
-                { title: { contains: search } },
-                { originalTitle: { contains: search } },
-              ],
-            },
-          }
-        : {}),
+      ...(Object.keys(movieWhere).length > 0 ? { movie: movieWhere } : {}),
     };
 
-    const items = await prisma.userMovie.findMany({
-      where,
-      include: {
-        movie: true,
-        watchHistory: {
-          orderBy: { watchedAt: "desc" },
+    const [items, allItems] = await Promise.all([
+      prisma.userMovie.findMany({
+        where,
+        include: {
+          movie: true,
+          watchHistory: {
+            orderBy: { watchedAt: "desc" },
+          },
         },
-      },
-    });
+      }),
+      prisma.userMovie.findMany({
+        where: { userId: user.id },
+        include: {
+          movie: true,
+          watchHistory: {
+            orderBy: { watchedAt: "desc" },
+          },
+        },
+      }),
+    ]);
+
+    const filterOptions = {
+      genres: Array.from(
+        new Set(allItems.flatMap((item) => parseStringArray(item.movie.genresJson))),
+      ).sort((a, b) => a.localeCompare(b)),
+      directors: Array.from(
+        new Set(
+          allItems
+            .map((item) => item.movie.director)
+            .filter((itemDirector): itemDirector is string => Boolean(itemDirector)),
+        ),
+      ).sort((a, b) => a.localeCompare(b)),
+    };
 
     const filtered = genre
       ? items.filter((item) => parseStringArray(item.movie.genresJson).includes(genre))
@@ -68,7 +97,7 @@ export async function GET(request: Request) {
       return (bWatch?.watchedAt.getTime() ?? 0) - (aWatch?.watchedAt.getTime() ?? 0);
     });
 
-    return NextResponse.json({ items: sorted.map(serializeLibraryMovie) });
+    return NextResponse.json({ items: sorted.map(serializeLibraryMovie), filterOptions });
   } catch {
     return NextResponse.json(
       { message: "No hemos podido cargar tu estantería." },

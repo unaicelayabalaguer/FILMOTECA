@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  ArrowLeft,
   Calendar,
   Check,
   Clock3,
@@ -15,6 +16,7 @@ import {
   Sparkles,
   Star,
   Trash2,
+  UserRound,
 } from "lucide-react";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import type { LibraryItem, TmdbSearchResult } from "@/components/types";
@@ -32,6 +34,12 @@ import {
 
 type View = "shelf" | "recent" | "favorites" | "top";
 type Sort = "recent" | "rating" | "release" | "title";
+type FilterOptions = { genres: string[]; directors: string[] };
+type LibraryResponse = {
+  items?: LibraryItem[];
+  filterOptions?: FilterOptions;
+  message?: string;
+};
 
 const navItems: Array<{ id: View; label: string; icon: typeof Library }> = [
   { id: "shelf", label: "Mi estantería", icon: Library },
@@ -54,6 +62,8 @@ export function MovieLibrary() {
   const [view, setView] = useState<View>("shelf");
   const [sort, setSort] = useState<Sort>("recent");
   const [genre, setGenre] = useState("");
+  const [director, setDirector] = useState("");
+  const [filterOptions, setFilterOptions] = useState<FilterOptions>({ genres: [], directors: [] });
   const [search, setSearch] = useState("");
   const [showWelcome, setShowWelcome] = useState(true);
   const [loading, setLoading] = useState(true);
@@ -78,15 +88,20 @@ export function MovieLibrary() {
       params.set("genre", genre);
     }
 
+    if (director) {
+      params.set("director", director);
+    }
+
     try {
       const response = await fetch(`/api/library?${params.toString()}`, { signal });
-      const data = (await response.json()) as { items?: LibraryItem[]; message?: string };
+      const data = (await response.json()) as LibraryResponse;
 
       if (!response.ok) {
         throw new Error(data.message);
       }
 
       setItems(data.items ?? []);
+      setFilterOptions(data.filterOptions ?? { genres: [], directors: [] });
     } catch (requestError) {
       if (requestError instanceof DOMException && requestError.name === "AbortError") {
         return;
@@ -106,18 +121,12 @@ export function MovieLibrary() {
       controller.abort();
       window.clearTimeout(timeout);
     };
-  }, [view, sort, genre, search]);
+  }, [view, sort, genre, director, search]);
 
   useEffect(() => {
     const timeout = window.setTimeout(() => setShowWelcome(false), 2500);
     return () => window.clearTimeout(timeout);
   }, []);
-
-  const genres = useMemo(() => {
-    return Array.from(new Set(items.flatMap((item) => item.movie.genres))).sort((a, b) =>
-      a.localeCompare(b),
-    );
-  }, [items]);
 
   const favoriteCount = useMemo(() => items.filter((item) => item.favorite).length, [items]);
   const averageRating = useMemo(() => {
@@ -260,7 +269,7 @@ export function MovieLibrary() {
                   />
                 </div>
 
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2">
                   <div className="relative">
                     <SlidersHorizontal className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-600" />
                     <select
@@ -276,19 +285,39 @@ export function MovieLibrary() {
                     </select>
                   </div>
 
-                  <select
-                    value={genre}
-                    onChange={(event) => setGenre(event.target.value)}
-                    className={`${inputClass} hidden w-40 appearance-none sm:block`}
-                    aria-label="Filtrar por género"
-                  >
-                    <option value="">Todos los géneros</option>
-                    {genres.map((itemGenre) => (
-                      <option key={itemGenre} value={itemGenre}>
-                        {itemGenre}
-                      </option>
-                    ))}
-                  </select>
+                  <div className="relative">
+                    <Film className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-600" />
+                    <select
+                      value={genre}
+                      onChange={(event) => setGenre(event.target.value)}
+                      className={`${inputClass} w-44 appearance-none pl-9`}
+                      aria-label="Filtrar por género"
+                    >
+                      <option value="">Todos los géneros</option>
+                      {filterOptions.genres.map((itemGenre) => (
+                        <option key={itemGenre} value={itemGenre}>
+                          {itemGenre}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="relative">
+                    <UserRound className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-600" />
+                    <select
+                      value={director}
+                      onChange={(event) => setDirector(event.target.value)}
+                      className={`${inputClass} w-48 appearance-none pl-9`}
+                      aria-label="Filtrar por director"
+                    >
+                      <option value="">Todos los directores</option>
+                      {filterOptions.directors.map((itemDirector) => (
+                        <option key={itemDirector} value={itemDirector}>
+                          {itemDirector}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
 
                 <button
@@ -315,7 +344,7 @@ export function MovieLibrary() {
               />
             ) : null}
 
-            {!loading && !error && items.length === 0 && !search && !genre ? (
+            {!loading && !error && items.length === 0 && !search && !genre && !director ? (
               <StateMessage
                 title="Tu estantería está vacía"
                 body="Añade la primera película vista y empieza a construir tu colección."
@@ -324,7 +353,7 @@ export function MovieLibrary() {
               />
             ) : null}
 
-            {!loading && !error && items.length === 0 && (search || genre) ? (
+            {!loading && !error && items.length === 0 && (search || genre || director) ? (
               <StateMessage
                 title="Sin resultados"
                 body="No hay películas que coincidan con esta búsqueda o filtro."
@@ -332,6 +361,7 @@ export function MovieLibrary() {
                 onAction={() => {
                   setSearch("");
                   setGenre("");
+                  setDirector("");
                 }}
               />
             ) : null}
@@ -1131,6 +1161,17 @@ function MovieDetailDrawer({
               </button>
             </form>
           </aside>
+        </div>
+
+        <div className="sticky bottom-0 border-t border-white/10 bg-[#101113]/[0.96] px-5 py-4 backdrop-blur sm:px-8">
+          <button
+            type="button"
+            onClick={onClose}
+            className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-md bg-white text-sm font-medium text-zinc-950 shadow-[0_18px_48px_rgba(0,0,0,0.24)] transition hover:bg-zinc-200"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Volver a la estantería
+          </button>
         </div>
       </div>
     </Drawer>
