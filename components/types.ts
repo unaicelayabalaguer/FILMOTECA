@@ -29,6 +29,8 @@ export type WatchHistory = {
 export type LibraryItem = {
   id: string;
   favorite: boolean;
+  physicalFormat: string;
+  photos: string[];
   createdAt: string;
   updatedAt: string;
   movie: Movie;

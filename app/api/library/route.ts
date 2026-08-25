@@ -85,6 +85,7 @@ export async function POST(request: Request) {
       rating?: number;
       review?: string;
       favorite?: boolean;
+      physicalFormat?: string;
     };
 
     if (!body.tmdbId || !body.watchedAt || typeof body.rating !== "number") {
@@ -151,11 +152,13 @@ export async function POST(request: Request) {
       },
       update: {
         favorite: body.favorite ?? false,
+        physicalFormat: normalizePhysicalFormat(body.physicalFormat),
       },
       create: {
         userId: user.id,
         movieId: movie.id,
         favorite: body.favorite ?? false,
+        physicalFormat: normalizePhysicalFormat(body.physicalFormat),
       },
     });
 
@@ -185,4 +188,9 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ message }, { status: 500 });
   }
+}
+
+function normalizePhysicalFormat(value: string | undefined) {
+  const allowed = ["Sin formato", "DVD", "Blu-ray", "VHS"];
+  return value && allowed.includes(value) ? value : "Sin formato";
 }

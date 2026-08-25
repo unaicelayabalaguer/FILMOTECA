@@ -39,6 +39,8 @@ export async function PATCH(request: Request, context: RouteContext) {
   try {
     const body = (await request.json()) as {
       favorite?: boolean;
+      physicalFormat?: string;
+      photos?: string[];
       watchedAt?: string;
       rating?: number;
       review?: string;
@@ -56,10 +58,21 @@ export async function PATCH(request: Request, context: RouteContext) {
       return NextResponse.json({ message: "No hemos encontrado esa película." }, { status: 404 });
     }
 
-    if (typeof body.favorite === "boolean") {
+    if (
+      typeof body.favorite === "boolean" ||
+      typeof body.physicalFormat === "string" ||
+      Array.isArray(body.photos)
+    ) {
       await prisma.userMovie.update({
         where: { id },
-        data: { favorite: body.favorite },
+        data: {
+          favorite: typeof body.favorite === "boolean" ? body.favorite : undefined,
+          physicalFormat:
+            typeof body.physicalFormat === "string"
+              ? normalizePhysicalFormat(body.physicalFormat)
+              : undefined,
+          photosJson: Array.isArray(body.photos) ? JSON.stringify(normalizePhotos(body.photos)) : undefined,
+        },
       });
     }
 
@@ -87,6 +100,17 @@ export async function PATCH(request: Request, context: RouteContext) {
   } catch {
     return NextResponse.json({ message: "No hemos podido actualizar la película." }, { status: 500 });
   }
+}
+
+function normalizePhysicalFormat(value: string) {
+  const allowed = ["Sin formato", "DVD", "Blu-ray", "VHS"];
+  return allowed.includes(value) ? value : "Sin formato";
+}
+
+function normalizePhotos(photos: string[]) {
+  return photos
+    .filter((photo) => typeof photo === "string" && photo.startsWith("data:image/"))
+    .slice(0, 6);
 }
 
 export async function DELETE(_request: Request, context: RouteContext) {

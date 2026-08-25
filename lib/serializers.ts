@@ -11,6 +11,8 @@ export function serializeLibraryMovie(item: LibraryMovie) {
   return {
     id: item.id,
     favorite: item.favorite,
+    physicalFormat: item.physicalFormat,
+    photos: parseStringArray(item.photosJson),
     createdAt: item.createdAt.toISOString(),
     updatedAt: item.updatedAt.toISOString(),
     movie: {

@@ -6,6 +6,7 @@ import {
   Clock3,
   Film,
   Heart,
+  ImagePlus,
   Library,
   Plus,
   Search,
@@ -45,6 +46,8 @@ const viewTitles: Record<View, string> = {
   favorites: "Favoritas",
   top: "Mejor valoradas",
 };
+
+const physicalFormats = ["Sin formato", "DVD", "Blu-ray", "VHS"];
 
 export function MovieLibrary() {
   const [items, setItems] = useState<LibraryItem[]>([]);
@@ -417,6 +420,7 @@ function WelcomeOverlay({ visible }: { visible: boolean }) {
 
 function MoviePoster({ item, onOpen }: { item: LibraryItem; onOpen: () => void }) {
   const poster = tmdbImage(item.movie.posterPath, "w500");
+  const hasFormat = item.physicalFormat && item.physicalFormat !== "Sin formato";
 
   return (
     <button type="button" onClick={onOpen} className="group min-w-0 text-left">
@@ -434,6 +438,11 @@ function MoviePoster({ item, onOpen }: { item: LibraryItem; onOpen: () => void }
         )}
 
         <div className="absolute inset-0 bg-gradient-to-t from-black/[0.76] via-black/[0.12] to-transparent opacity-0 transition duration-300 group-hover:opacity-100" />
+        {hasFormat ? (
+          <span className="absolute left-2 top-2 rounded bg-black/[0.62] px-2 py-1 text-[11px] font-medium text-amber-100 ring-1 ring-white/10 backdrop-blur">
+            {item.physicalFormat}
+          </span>
+        ) : null}
         <div className="absolute inset-x-0 bottom-0 translate-y-3 px-3 pb-3 opacity-0 transition duration-300 group-hover:translate-y-0 group-hover:opacity-100">
           <div className="flex items-center justify-between text-xs text-white">
             <span>{item.latestWatch ? formatDate(item.latestWatch.watchedAt) : "Sin visionado"}</span>
@@ -528,6 +537,7 @@ function AddMovieDrawer({
   const [rating, setRating] = useState("8");
   const [review, setReview] = useState("");
   const [favorite, setFavorite] = useState(false);
+  const [physicalFormat, setPhysicalFormat] = useState("Sin formato");
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -596,6 +606,7 @@ function AddMovieDrawer({
     setRating("8");
     setReview("");
     setFavorite(false);
+    setPhysicalFormat("Sin formato");
     setError("");
     setSetupMessage("");
   };
@@ -619,6 +630,7 @@ function AddMovieDrawer({
           rating: Number(rating),
           review,
           favorite,
+          physicalFormat,
         }),
       });
       const data = (await response.json()) as { message?: string };
@@ -757,6 +769,20 @@ function AddMovieDrawer({
               />
             </Field>
 
+            <Field label="Formato">
+              <select
+                value={physicalFormat}
+                onChange={(event) => setPhysicalFormat(event.target.value)}
+                className={`${inputClass} w-full appearance-none`}
+              >
+                {physicalFormats.map((format) => (
+                  <option key={format} value={format}>
+                    {format}
+                  </option>
+                ))}
+              </select>
+            </Field>
+
             <label className="flex items-center justify-between rounded-md border border-white/[0.08] bg-white/[0.035] px-3 py-3 text-sm text-zinc-300">
               <span>Marcar como favorita</span>
               <input
@@ -796,6 +822,8 @@ function MovieDetailDrawer({
   const [watchedAt, setWatchedAt] = useState("");
   const [rating, setRating] = useState("");
   const [review, setReview] = useState("");
+  const [physicalFormat, setPhysicalFormat] = useState("Sin formato");
+  const [photos, setPhotos] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
@@ -803,6 +831,8 @@ function MovieDetailDrawer({
     setWatchedAt(item?.latestWatch?.watchedAt.slice(0, 10) ?? "");
     setRating(item?.latestWatch ? String(item.latestWatch.rating) : "");
     setReview(item?.latestWatch?.review ?? "");
+    setPhysicalFormat(item?.physicalFormat ?? "Sin formato");
+    setPhotos(item?.photos ?? []);
     setError("");
   }, [item]);
 
@@ -865,7 +895,30 @@ function MovieDetailDrawer({
       watchedAt,
       rating: Number(rating),
       review,
+      physicalFormat,
+      photos,
     });
+  };
+
+  const handlePhotoUpload = async (files: FileList | null) => {
+    if (!files || files.length === 0) {
+      return;
+    }
+
+    setError("");
+
+    try {
+      const remainingSlots = Math.max(0, 6 - photos.length);
+      const selectedFiles = Array.from(files).slice(0, remainingSlots);
+      const resizedPhotos = await Promise.all(selectedFiles.map((file) => resizeImageFile(file)));
+      setPhotos((current) => [...current, ...resizedPhotos].slice(0, 6));
+    } catch {
+      setError("No hemos podido preparar esas fotografías.");
+    }
+  };
+
+  const removePhoto = (photoIndex: number) => {
+    setPhotos((current) => current.filter((_, index) => index !== photoIndex));
   };
 
   return (
@@ -913,6 +966,7 @@ function MovieDetailDrawer({
                 <span>{minutesToRuntime(item.movie.runtime)}</span>
                 {item.movie.director ? <span>{item.movie.director}</span> : null}
                 {item.movie.tmdbVoteAverage ? <span>TMDB {item.movie.tmdbVoteAverage.toFixed(1)}</span> : null}
+                {item.physicalFormat !== "Sin formato" ? <span>{item.physicalFormat}</span> : null}
               </div>
             </div>
           </div>
@@ -970,6 +1024,20 @@ function MovieDetailDrawer({
             {error ? <p className="rounded-md border border-red-400/20 bg-red-400/10 px-3 py-2 text-sm text-red-200">{error}</p> : null}
 
             <form onSubmit={handleSubmit} className="grid gap-4">
+              <Field label="Formato">
+                <select
+                  value={physicalFormat}
+                  onChange={(event) => setPhysicalFormat(event.target.value)}
+                  className={`${inputClass} w-full appearance-none`}
+                >
+                  {physicalFormats.map((format) => (
+                    <option key={format} value={format}>
+                      {format}
+                    </option>
+                  ))}
+                </select>
+              </Field>
+
               <Field label="Fecha vista">
                 <div className="relative">
                   <Calendar className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-600" />
@@ -1004,6 +1072,55 @@ function MovieDetailDrawer({
                   placeholder="Tu comentario personal"
                 />
               </Field>
+
+              <div className="grid gap-3">
+                <div className="flex items-center justify-between gap-3">
+                  <h4 className="text-xs font-medium uppercase text-zinc-500">Fotografías</h4>
+                  <label className="inline-flex h-9 cursor-pointer items-center justify-center gap-2 rounded-md border border-white/10 bg-white/[0.04] px-3 text-sm text-zinc-200 transition hover:border-white/20 hover:bg-white/[0.08]">
+                    <ImagePlus className="h-4 w-4" />
+                    Añadir
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      className="sr-only"
+                      onChange={(event) => {
+                        handlePhotoUpload(event.target.files);
+                        event.currentTarget.value = "";
+                      }}
+                    />
+                  </label>
+                </div>
+
+                {photos.length > 0 ? (
+                  <div className="grid grid-cols-3 gap-2">
+                    {photos.map((photo, index) => (
+                      <div
+                        key={`${photo.slice(0, 28)}-${index}`}
+                        className="group/photo relative aspect-square overflow-hidden rounded-md bg-zinc-900 ring-1 ring-white/10"
+                      >
+                        <img
+                          src={photo}
+                          alt={`Fotografía personal ${index + 1}`}
+                          className="h-full w-full object-cover"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => removePhoto(index)}
+                          className="absolute right-1.5 top-1.5 flex h-7 w-7 items-center justify-center rounded-md bg-black/[0.62] text-zinc-200 opacity-0 transition hover:text-red-200 group-hover/photo:opacity-100"
+                          aria-label="Eliminar fotografía"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="rounded-md border border-dashed border-white/[0.08] px-3 py-4 text-center text-sm text-zinc-600">
+                    Añade fotos de tu edición, carátula o copia física.
+                  </p>
+                )}
+              </div>
 
               <button
                 type="submit"
@@ -1046,4 +1163,25 @@ function PosterThumb({
       )}
     </div>
   );
+}
+
+async function resizeImageFile(file: File) {
+  const bitmap = await createImageBitmap(file);
+  const maxSide = 1000;
+  const scale = Math.min(1, maxSide / Math.max(bitmap.width, bitmap.height));
+  const width = Math.round(bitmap.width * scale);
+  const height = Math.round(bitmap.height * scale);
+  const canvas = document.createElement("canvas");
+  const context = canvas.getContext("2d");
+
+  if (!context) {
+    throw new Error("Canvas unavailable");
+  }
+
+  canvas.width = width;
+  canvas.height = height;
+  context.drawImage(bitmap, 0, 0, width, height);
+  bitmap.close();
+
+  return canvas.toDataURL("image/jpeg", 0.78);
 }

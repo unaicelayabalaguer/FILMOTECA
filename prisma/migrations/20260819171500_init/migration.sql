@@ -34,6 +34,8 @@ CREATE TABLE "UserMovie" (
     "userId" TEXT NOT NULL,
     "movieId" TEXT NOT NULL,
     "favorite" BOOLEAN NOT NULL DEFAULT false,
+    "physicalFormat" TEXT NOT NULL DEFAULT 'Sin formato',
+    "photosJson" TEXT NOT NULL DEFAULT '[]',
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
