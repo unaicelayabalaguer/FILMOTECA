@@ -49,3 +49,18 @@ export type TmdbSearchResult = {
   vote_average: number;
   director?: string | null;
 };
+
+export type Publication = {
+  id: string;
+  title: string;
+  issueNumber: string | null;
+  publicationDate: string | null;
+  author: string | null;
+  genre: string | null;
+  type: string;
+  language: string | null;
+  coverImage: string | null;
+  photos: string[];
+  createdAt: string;
+  updatedAt: string;
+};

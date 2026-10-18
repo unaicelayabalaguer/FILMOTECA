@@ -12,6 +12,30 @@ model User {
   email      String      @unique
   createdAt  DateTime    @default(now())
   userMovies UserMovie[]
+  publications Publication[]
+}
+
+model Publication {
+  id              String   @id @default(cuid())
+  userId          String
+  title           String
+  issueNumber     String?
+  publicationDate DateTime?
+  author          String?
+  genre           String?
+  type            String
+  language        String?
+  coverImage      String?
+  photosJson      String   @default("[]")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, updatedAt])
+  @@index([userId, title])
+  @@index([userId, author])
+  @@index([userId, genre])
+  @@index([userId, type])
 }
 
 model Movie {

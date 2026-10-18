@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Filmoteca",
-  description: "Estantería digital personal de películas.",
+  title: "Mi colección",
+  description: "Colección digital personal de películas y publicaciones.",
 };
 
 export default function RootLayout({

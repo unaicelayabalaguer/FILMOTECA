@@ -7,6 +7,7 @@ import {
   Clock3,
   Film,
   Heart,
+  House,
   ImagePlus,
   Library,
   Plus,
@@ -18,6 +19,7 @@ import {
   Trash2,
   UserRound,
 } from "lucide-react";
+import Link from "next/link";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import type { LibraryItem, TmdbSearchResult } from "@/components/types";
 import {
@@ -191,6 +193,14 @@ export function MovieLibrary() {
                 </div>
               </div>
             </div>
+
+            <Link
+              href="/"
+              className="flex h-10 items-center gap-3 rounded-md px-3 text-sm text-zinc-500 transition hover:bg-white/[0.04] hover:text-zinc-200"
+            >
+              <House className="h-4 w-4" />
+              Volver al inicio
+            </Link>
 
             <nav className="flex gap-1 overflow-x-auto pb-1 lg:grid lg:overflow-visible">
               {navItems.map((item) => {
