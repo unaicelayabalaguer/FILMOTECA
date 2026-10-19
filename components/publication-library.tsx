@@ -32,9 +32,9 @@ const emptyForm: FormState = {
   title: "", issueNumber: "", publicationDate: "", author: "", genre: "",
   type: "Revista", language: "Castellano", coverImage: null, photos: [],
 };
-const commonTypes = ["Revista", "Libro", "Catálogo"];
-const commonGenres = ["Cine", "Deportes", "Informática", "Cultura", "Música", "Historia"];
-const commonLanguages = ["Castellano", "Inglés", "Euskera", "Francés", "Alemán"];
+const commonTypes = ["Revista", "Libro", "Catálogo", "Cómic", "Fanzine", "Periódico", "Suplemento", "Programa", "Folleto"];
+const commonGenres = ["Cine", "Deportes", "Informática", "Cultura", "Música", "Historia", "Arte", "Fotografía", "Literatura", "Ciencia", "Viajes", "Moda", "Motor", "Videojuegos"];
+const commonLanguages = ["Castellano", "Inglés", "Euskera", "Catalán", "Gallego", "Francés", "Alemán", "Italiano", "Portugués"];
 
 export function PublicationLibrary() {
   const [items, setItems] = useState<Publication[]>([]);
@@ -82,20 +82,30 @@ export function PublicationLibrary() {
   const hasFilters = Boolean(search || genre || type || language || author);
 
   return (
-    <main className="min-h-screen">
-      <div className="grid min-h-screen grid-cols-1 lg:grid-cols-[248px_1fr]">
-        <aside className="border-b border-white/10 bg-black/20 px-3 py-3 backdrop-blur-xl lg:sticky lg:top-0 lg:h-screen lg:border-b-0 lg:border-r lg:border-white/[0.08] lg:px-4 lg:py-5">
+    <main className="paper-noise min-h-screen bg-[#0c0d0e]">
+      <div className="grid min-h-screen grid-cols-1 lg:grid-cols-[268px_1fr]">
+        <aside className="border-b border-white/10 bg-[#0a0b0c]/90 px-3 py-3 backdrop-blur-xl lg:sticky lg:top-0 lg:h-screen lg:border-b-0 lg:border-r lg:border-white/[0.08] lg:px-5 lg:py-5">
           <div className="flex h-full flex-col gap-4">
-            <div className="flex items-center gap-3 rounded-md border border-white/[0.06] bg-white/[0.035] px-2.5 py-2.5">
+            <div className="flex items-center gap-3 border-b border-white/[0.08] px-2 pb-5 pt-1">
               <div className="flex h-9 w-9 items-center justify-center rounded-md bg-amber-400 text-zinc-950"><BookOpen className="h-5 w-5" /></div>
-              <div><p className="text-sm font-semibold text-zinc-50">Revisteca</p><p className="text-xs text-zinc-500">Colección editorial</p></div>
+              <div><p className="font-display text-xl text-zinc-50">Revisteca</p><p className="text-[11px] text-zinc-600">Archivo editorial</p></div>
             </div>
             <Link href="/" className="flex h-10 items-center gap-3 rounded-md px-3 text-sm text-zinc-500 transition hover:bg-white/[0.04] hover:text-zinc-200">
               <House className="h-4 w-4" /> Volver al inicio
             </Link>
-            <button type="button" onClick={() => setCreating(true)} className="flex h-10 items-center gap-3 rounded-md bg-white/[0.085] px-3 text-sm text-white shadow-[inset_3px_0_0_rgba(245,183,77,0.82)]">
+            <button type="button" onClick={() => setType("")} className="flex h-10 items-center gap-3 rounded-md bg-white/[0.085] px-3 text-sm text-white shadow-[inset_3px_0_0_rgba(245,183,77,0.82)]">
               <BookOpen className="h-4 w-4" /> Mi colección
             </button>
+            <div className="hidden pt-3 lg:block">
+              <p className="px-3 text-[10px] font-medium uppercase text-zinc-700">Por tipología</p>
+              <div className="mt-2 grid gap-0.5">
+                {commonTypes.slice(0, 6).map((entryType) => (
+                  <button key={entryType} type="button" onClick={() => setType(entryType)} className={`flex h-9 items-center rounded-md px-3 text-sm transition ${type === entryType ? "bg-white/[0.06] text-amber-200" : "text-zinc-600 hover:bg-white/[0.035] hover:text-zinc-300"}`}>
+                    <span>{entryType}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
             <div className="mt-auto hidden border-t border-white/[0.07] pt-4 text-xs leading-5 text-zinc-600 lg:block">
               Revistas, libros y catálogos<br />en una misma estantería.
             </div>
@@ -103,9 +113,9 @@ export function PublicationLibrary() {
         </aside>
 
         <section className="min-w-0">
-          <header className="sticky top-0 z-30 border-b border-white/[0.08] bg-[#0d0e10]/[0.9] px-4 py-4 backdrop-blur-xl sm:px-6">
+          <header className="sticky top-0 z-30 border-b border-white/[0.08] bg-[#0d0e10]/[0.92] px-4 py-4 backdrop-blur-xl sm:px-6 lg:px-8 lg:py-5">
             <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
-              <div><h1 className="text-xl font-semibold text-zinc-50">Mi revisteca</h1><p className="mt-1 text-xs text-zinc-500">{items.length} publicaciones</p></div>
+              <div><p className="mb-1 text-[10px] font-medium uppercase text-amber-300">Colección editorial</p><h1 className="font-display text-3xl text-zinc-50">Mi revisteca</h1><p className="mt-1 text-xs text-zinc-600">{items.length} publicaciones en esta vista</p></div>
               <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
                 <div className="relative sm:w-64"><Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-600" /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Título, número o autor" className={`${inputClass} w-full pl-9`} /></div>
                 <Select value={sort} onChange={(value) => setSort(value as Sort)} icon={<Filter className="h-4 w-4" />} label="Ordenar" options={[['recent','Más recientes'],['title','Título'],['date','Fecha publicación'],['number','Número']]} />
@@ -121,12 +131,12 @@ export function PublicationLibrary() {
             </div>
           </header>
 
-          <div className="px-4 py-7 sm:px-6 lg:px-8">
+          <div className="px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
             {loading ? <Skeleton /> : null}
             {!loading && error ? <Empty title="No se ha podido cargar la revisteca" body="Revisa la conexión y vuelve a intentarlo." action="Reintentar" onAction={() => load()} /> : null}
             {!loading && !error && items.length === 0 ? <Empty title={hasFilters ? "Sin resultados" : "Tu revisteca está vacía"} body={hasFilters ? "No hay publicaciones que coincidan con los filtros." : "Añade tu primera revista, libro o catálogo."} action={hasFilters ? "Limpiar filtros" : "Añadir publicación"} onAction={() => hasFilters ? (setSearch(""), setGenre(""), setType(""), setLanguage(""), setAuthor("")) : setCreating(true)} /> : null}
             {!loading && !error && items.length > 0 ? (
-              <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-7">
+              <div className="grid grid-cols-2 gap-x-5 gap-y-10 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
                 {items.map((item) => <PublicationCard key={item.id} item={item} onClick={() => setSelected(item)} />)}
               </div>
             ) : null}
@@ -142,13 +152,19 @@ export function PublicationLibrary() {
 
 function PublicationCard({ item, onClick }: { item: Publication; onClick: () => void }) {
   return <button type="button" onClick={onClick} className="group min-w-0 text-left">
-    <div className="relative aspect-[3/4] overflow-hidden rounded-md bg-[#17181a] shadow-[0_20px_45px_rgba(0,0,0,0.35)] ring-1 ring-white/10 transition duration-300 group-hover:-translate-y-1 group-hover:ring-amber-300/40">
+    <div className="relative aspect-[3/4] overflow-hidden rounded-sm bg-[#17181a] shadow-[0_24px_48px_rgba(0,0,0,0.42)] ring-1 ring-white/10 transition duration-300 group-hover:-translate-y-1 group-hover:shadow-[0_28px_60px_rgba(0,0,0,0.52)] group-hover:ring-amber-300/40">
       {item.coverImage ? <img src={item.coverImage} alt={`Portada de ${item.title}`} className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.025]" /> : <div className="flex h-full flex-col items-center justify-center gap-3 bg-[linear-gradient(145deg,#222326,#121315)] px-4 text-center text-zinc-600"><BookOpen className="h-10 w-10" /><span className="text-xs">Sin portada</span></div>}
-      <span className="absolute left-2 top-2 rounded bg-black/70 px-2 py-1 text-[10px] font-medium text-amber-100 ring-1 ring-white/10 backdrop-blur">{item.type}</span>
-      {item.issueNumber ? <span className="absolute bottom-2 right-2 rounded bg-black/70 px-2 py-1 text-[10px] text-white backdrop-blur">N.º {item.issueNumber}</span> : null}
+      <span className="absolute left-2 top-2 rounded-sm bg-black/75 px-2 py-1 text-[10px] font-medium text-amber-100 ring-1 ring-white/10 backdrop-blur">{item.type}</span>
+      {item.issueNumber ? <span className="absolute bottom-2 right-2 rounded-sm bg-black/75 px-2 py-1 text-[10px] text-white backdrop-blur">N.º {item.issueNumber}</span> : null}
     </div>
-    <h2 className="mt-3 truncate text-sm font-medium text-zinc-100">{item.title}</h2>
-    <p className="mt-1 truncate text-xs text-zinc-500">{item.author || item.genre || "Sin autor"}</p>
+    <div className="mt-4 border-t border-white/[0.08] pt-3">
+      <div className="flex items-start justify-between gap-3">
+        <h2 className="font-display line-clamp-2 text-lg leading-5 text-zinc-100">{item.title}</h2>
+        {item.publicationDate ? <span className="shrink-0 text-[10px] text-zinc-700">{new Date(item.publicationDate).getFullYear()}</span> : null}
+      </div>
+      <p className="mt-2 truncate text-xs text-zinc-500">{item.author || "Autor desconocido"}</p>
+      <p className="mt-1 truncate text-[10px] text-zinc-700">{[item.genre, item.language].filter(Boolean).join(" · ") || "Sin clasificar"}</p>
+    </div>
   </button>;
 }
 
@@ -207,7 +223,7 @@ function PublicationForm({ open, item, onClose, onSaved, onDeleted }: { open: bo
           <Field label="Fecha de publicación"><div className="relative"><Calendar className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-600" /><input type="date" value={form.publicationDate} onChange={(event) => update("publicationDate", event.target.value)} className={`${inputClass} w-full pl-9`} /></div></Field>
           <Field label="Autor"><input list="publication-authors" value={form.author} onChange={(event) => update("author", event.target.value)} placeholder="Autor o editorial" className={`${inputClass} w-full`} /></Field>
           <Field label="Género"><input list="publication-genres" value={form.genre} onChange={(event) => update("genre", event.target.value)} placeholder="Cine, deportes..." className={`${inputClass} w-full`} /><datalist id="publication-genres">{commonGenres.map((value) => <option key={value} value={value} />)}</datalist></Field>
-          <Field label="Tipo"><select required value={form.type} onChange={(event) => update("type", event.target.value)} className={`${inputClass} w-full`}><option value="">Selecciona un tipo</option>{commonTypes.map((value) => <option key={value}>{value}</option>)}</select></Field>
+          <Field label="Tipología"><select required value={form.type} onChange={(event) => update("type", event.target.value)} className={`${inputClass} w-full`}><option value="">Selecciona una tipología</option>{commonTypes.map((value) => <option key={value}>{value}</option>)}</select></Field>
           <Field label="Idioma"><input list="publication-languages" value={form.language} onChange={(event) => update("language", event.target.value)} placeholder="Castellano, inglés..." className={`${inputClass} w-full`} /><datalist id="publication-languages">{commonLanguages.map((value) => <option key={value} value={value} />)}</datalist></Field>
 
           <div className="sm:col-span-2">

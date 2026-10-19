@@ -252,7 +252,7 @@ export function MovieLibrary() {
           <header className="sticky top-0 z-30 border-b border-white/[0.08] bg-[#0d0e10]/[0.86] px-4 py-3 backdrop-blur-xl sm:px-6">
             <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
               <div className="min-w-0">
-                <h1 className="text-xl font-semibold text-zinc-50">
+                <h1 className="font-display text-2xl text-zinc-50">
                   {viewTitles[view]}
                 </h1>
                 <div className="mt-2 flex flex-wrap gap-2 text-xs text-zinc-500">
@@ -448,7 +448,7 @@ function WelcomeOverlay({ visible }: { visible: boolean }) {
         <div className="mx-auto mb-7 flex h-11 w-11 items-center justify-center rounded-md bg-amber-400 text-sm font-semibold text-zinc-950 shadow-[0_18px_60px_rgba(245,183,77,0.16)]">
           F
         </div>
-        <p className="text-4xl font-semibold text-zinc-50 sm:text-6xl">¡Hola igor!</p>
+        <p className="font-display text-4xl text-zinc-50 sm:text-6xl">¡Hola Igor!</p>
         <p className="mt-4 text-base leading-7 text-zinc-400 sm:text-lg">
           Aquí tienes tu filmoteca
         </p>
