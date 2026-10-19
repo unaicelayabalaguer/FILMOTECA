@@ -173,12 +173,7 @@ export function MovieLibrary() {
 
   return (
     <main className="relative min-h-screen overflow-hidden">
-      <WelcomeOverlay visible={showWelcome} />
-      <div className="pointer-events-none fixed inset-0 -z-10">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_0%,rgba(236,181,83,0.10),transparent_32rem),radial-gradient(circle_at_15%_22%,rgba(255,255,255,0.045),transparent_22rem)]" />
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.018)_1px,transparent_1px)] bg-[length:100%_72px] opacity-35" />
-      </div>
-
+      <WelcomeOverlay visible={showWelcome} onDismiss={() => setShowWelcome(false)} />
       <div className="grid min-h-screen grid-cols-1 lg:grid-cols-[248px_1fr]">
         <aside className="border-b border-white/10 bg-black/[0.20] px-3 py-3 backdrop-blur-xl lg:sticky lg:top-0 lg:h-screen lg:border-b-0 lg:border-r lg:border-white/[0.08] lg:px-4 lg:py-5">
           <div className="flex h-full flex-col gap-4">
@@ -424,7 +419,7 @@ export function MovieLibrary() {
   );
 }
 
-function WelcomeOverlay({ visible }: { visible: boolean }) {
+function WelcomeOverlay({ visible, onDismiss }: { visible: boolean; onDismiss: () => void }) {
   return (
     <div
       className={`fixed inset-0 z-[80] flex items-center justify-center overflow-hidden bg-[#08090a] px-6 transition duration-700 ${
@@ -432,6 +427,13 @@ function WelcomeOverlay({ visible }: { visible: boolean }) {
       }`}
       aria-hidden={!visible}
     >
+      <button
+        type="button"
+        onClick={onDismiss}
+        className="absolute inset-0 z-10 cursor-pointer"
+        aria-label="Entrar en la filmoteca"
+        tabIndex={visible ? 0 : -1}
+      />
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_15%,rgba(245,183,77,0.10),transparent_34rem)]" />
       <div className="absolute inset-x-0 top-1/2 h-px bg-white/10" />
       <div className="absolute inset-x-0 top-[calc(50%+76px)] h-px bg-amber-300/[0.18] shadow-[0_18px_52px_rgba(0,0,0,0.55)]" />
@@ -444,7 +446,7 @@ function WelcomeOverlay({ visible }: { visible: boolean }) {
         ))}
       </div>
 
-      <div className="relative max-w-xl text-center welcome-intro">
+      <div className="pointer-events-none relative z-20 max-w-xl text-center welcome-intro">
         <div className="mx-auto mb-7 flex h-11 w-11 items-center justify-center rounded-md bg-amber-400 text-sm font-semibold text-zinc-950 shadow-[0_18px_60px_rgba(245,183,77,0.16)]">
           F
         </div>
@@ -453,6 +455,7 @@ function WelcomeOverlay({ visible }: { visible: boolean }) {
           Aquí tienes tu filmoteca
         </p>
         <div className="mx-auto mt-7 h-px w-36 bg-gradient-to-r from-transparent via-amber-300/70 to-transparent" />
+        <p className="mt-5 text-xs text-zinc-600">Toca para entrar</p>
       </div>
     </div>
   );

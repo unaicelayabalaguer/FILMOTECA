@@ -82,13 +82,13 @@ export function PublicationLibrary() {
   const hasFilters = Boolean(search || genre || type || language || author);
 
   return (
-    <main className="paper-noise min-h-screen bg-[#0c0d0e]">
+    <main className="min-h-screen bg-[#0c0d0e]">
       <div className="grid min-h-screen grid-cols-1 lg:grid-cols-[268px_1fr]">
         <aside className="border-b border-white/10 bg-[#0a0b0c]/90 px-3 py-3 backdrop-blur-xl lg:sticky lg:top-0 lg:h-screen lg:border-b-0 lg:border-r lg:border-white/[0.08] lg:px-5 lg:py-5">
           <div className="flex h-full flex-col gap-4">
             <div className="flex items-center gap-3 border-b border-white/[0.08] px-2 pb-5 pt-1">
               <div className="flex h-9 w-9 items-center justify-center rounded-md bg-amber-400 text-zinc-950"><BookOpen className="h-5 w-5" /></div>
-              <div><p className="font-display text-xl text-zinc-50">Revisteca</p><p className="text-[11px] text-zinc-600">Archivo editorial</p></div>
+              <div><p className="font-display text-xl text-zinc-50">Revisteca</p><p className="text-[11px] text-zinc-600">Colección de Igor</p></div>
             </div>
             <Link href="/" className="flex h-10 items-center gap-3 rounded-md px-3 text-sm text-zinc-500 transition hover:bg-white/[0.04] hover:text-zinc-200">
               <House className="h-4 w-4" /> Volver al inicio
@@ -97,7 +97,7 @@ export function PublicationLibrary() {
               <BookOpen className="h-4 w-4" /> Mi colección
             </button>
             <div className="hidden pt-3 lg:block">
-              <p className="px-3 text-[10px] font-medium uppercase text-zinc-700">Por tipología</p>
+              <p className="px-3 text-xs text-zinc-700">Tipos de publicación</p>
               <div className="mt-2 grid gap-0.5">
                 {commonTypes.slice(0, 6).map((entryType) => (
                   <button key={entryType} type="button" onClick={() => setType(entryType)} className={`flex h-9 items-center rounded-md px-3 text-sm transition ${type === entryType ? "bg-white/[0.06] text-amber-200" : "text-zinc-600 hover:bg-white/[0.035] hover:text-zinc-300"}`}>
@@ -115,7 +115,7 @@ export function PublicationLibrary() {
         <section className="min-w-0">
           <header className="sticky top-0 z-30 border-b border-white/[0.08] bg-[#0d0e10]/[0.92] px-4 py-4 backdrop-blur-xl sm:px-6 lg:px-8 lg:py-5">
             <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
-              <div><p className="mb-1 text-[10px] font-medium uppercase text-amber-300">Colección editorial</p><h1 className="font-display text-3xl text-zinc-50">Mi revisteca</h1><p className="mt-1 text-xs text-zinc-600">{items.length} publicaciones en esta vista</p></div>
+              <div><h1 className="font-display text-3xl text-zinc-50">Revistas, libros y catálogos</h1><p className="mt-1 text-xs text-zinc-600">{items.length} publicaciones</p></div>
               <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
                 <div className="relative sm:w-64"><Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-600" /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Título, número o autor" className={`${inputClass} w-full pl-9`} /></div>
                 <Select value={sort} onChange={(value) => setSort(value as Sort)} icon={<Filter className="h-4 w-4" />} label="Ordenar" options={[['recent','Más recientes'],['title','Título'],['date','Fecha publicación'],['number','Número']]} />
